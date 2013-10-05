@@ -4,8 +4,6 @@ import (
   "code.google.com/p/goconf/conf"
 )
 
-const section = "imap"
-
 type imapConfig struct {
   user string
   pass string
@@ -13,27 +11,28 @@ type imapConfig struct {
 }
 
 func NewImapConfig(conf *conf.ConfigFile)  *imapConfig {
-
-  user,   _ := conf.GetString(section, "user")
-  passwd, _ := conf.GetString(section, "pass")
-  server, _ := conf.GetString(section, "server")
+  user, _   := conf.GetString("imap", "user")
+  pass, _   := conf.GetString("imap", "pass")
+  server, _ := conf.GetString("imap", "server")
 
   imap := &imapConfig {
-    user: user,
-    pass: passwd,
+    user:   user,
+    pass:   pass,
     server: server }
 
   return imap
 }
 
-func (i *imapConfig) GetUser() string {
+func (i *imapConfig) User() string {
   return i.user
 }
 
-func (i *imapConfig) GetPassword() string {
+func (i *imapConfig) Pass() string {
   return i.pass
 }
 
-func (i *imapConfig) GetServer() string {
+func (i *imapConfig) Server() string {
   return i.server
 }
+
+

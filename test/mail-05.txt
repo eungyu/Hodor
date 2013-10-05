@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <style type="text/css" media="screen">
+    p, td { line-height: 1.3; }
+    p { padding-bottom: 1em; }
+    a { color: #3697b3; font-weight: bold; text-decoration: none; }
+    a:hover { color: #000; text-decoration: underline; }
+    a:active { color: #000; text-decoration: underline; }
+  </style>
+</head>
+<body style="font-size:12px;color:#262626;line-height:1.3;font-family:Arial, Helvetica, sans-serif;background-color:#fff;">
+<table cellspacing="0" cellpadding="0" width="100%" style="padding-bottom:20px;padding-top:10px;">
+  <tr>
+   <td style="line-height:1;text-align:left;padding-bottom:0px;">
+    <h3 style="margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;color:#262626;font-weight:bold;font-size:11px;"><a href="http://evernote.com/" style="color:#3697b3;font-weight:bold;text-decoration:none;">From Evernote:</a></h3>
+   </td>
+  </tr>
+  <tr>
+   <td style="line-height:1.3;text-align:left;padding-top:0px;padding-bottom:7px;border-bottom-width:1px;border-bottom-style:solid;border-bottom-color:#b5b5b5;font-size:11px;">
+    <h1 style="margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;padding-bottom:0;padding-right:0;padding-left:0;color:#262626;font-weight:bold;padding-top:5px;font-size:18px;">My New Used Bicycle</h1>
+   </td>
+  </tr>
+</table>
+<div style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;" class="ennote">
+자전거가 아름다운 것은 포르쉐가 잘 만들어진 것과 다르다. 자전거가 모양이 제각기 달라도 기본적으로 인간의 다리 힘에 의존하기 때문에 차가운 기계 보다 인간적인 도구로 분류하는 것이 맞다. 그래서 자전거는 사람에게 어울릴 수록 더 아름답다. 
+<div><br/></div>
+<div>자전거 가게에 여러 군데 들려보아도, 요즘 새로나오는 자전거들은 자전거의 진정성에서 멀어지는 것 같다는 생각이 들었다. 공기 저항을 덜 받고, 카본과 알루미눔으로 가볍게 만들고, 모양과 페인트도 무언가 미래 지향적인 모습으로 만든다. 이런 자전거들은 동네에서 타기도 뻘쭘할 뿐만 아니라 자전거의 본 모습 -- 사람의 친구가 되어 어딘가 데려다 주는 -- 에서 멀어져만 가는 것 같다. </div>
+<div><br/></div>
+<div>내가 원하던 자전거가 무엇일 까 찾는 도중, 80년대 자전거에 대해 알게 되었고 그때 만든 자전거들은 수도관을 용접해 놓은 듯한 단순함 속에서 심플한 미를 추구했다는 걸 알게되었다. 별 다른 노력을 하지 않는 단순한 자전거. </div>
+<div><br/></div>
+<div>찾기 쉽지는 않았는데 자전거 천국인 Palo Alto 에서 그런 자전거를 취급하고 있었다. 가서 낡아 보이는 자전거 이지만 마음에 쏙 든 하나를 집에 데려왔다. </div>
+<div><br/></div>
+<div><img height="683" width="1024" ext="jpeg" src="cid:4784f78ba63c8958f05b5d1d4b1b949d.jpeg" class="en-media"/><br/></div>
+<div><br/></div>
+<div>여기</div>
+<div><br/></div>
+<div><img height="683" width="1024" ext="jpeg" src="cid:5aa634989c97650608e9516b51e62b16.jpeg" class="en-media"/><br/></div>
+<div><br/></div>
+<div>이탈리아에서 온 듯하다. 유명하지 않은 자전거라 어디 찾아봐도 잘 안나온다. </div>
+<div><br/></div>
+<div><img height="683" width="1024" ext="jpeg" src="cid:0aa5455da3a58ed22c78a2a22258ff53.jpeg" class="en-media"/><br/></div>
+<div><br/></div>
+<div>기어가 있는데 핸들에 연결되어 있지 않아서 이렇게 생긴 레버를 잡아 당기거나 밀어야 한다. </div>
+<div><br/></div>
+<div><img height="683" width="1024" ext="jpeg" src="cid:1a29cffe5ec2303744648571591e1206.jpeg" class="en-media"/><br/></div>
+<div><br/></div>
+<div>별 노력 없는 Chrome Finish 가 좋았다. </div>
+<div><br/></div>
+<div><img height="683" width="1024" ext="jpeg" src="cid:99ce31785733967b4fe01b27eaaadaff.jpeg" class="en-media"/><br/></div>
+<div><br/></div>
+<div>둥글고 얇은 바퀴가 참 품위 있다. </div>
+<div><br/></div>
+<div>기념으로 동네 한바퀴를 도는데 벌써 자전거에게 고맙고 정이 든다. </div>
+</div>
+</body>
+</html>

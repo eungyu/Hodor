@@ -16,16 +16,19 @@ import (
   "image"
   "image/jpeg"
   "encoding/base64"
+  "time"
 )
 
 type Berry struct {
+  Id int64
   message *mail.Message
-  subject string
-  body    []string
+  Subject string
+  Body    []string
+  Created time.Time
   imgmap  map[string]image.Image
 }
 
-func NewBerry(m *mail.Message) (*Berry, error) {
+func NewBerry(id int64, m *mail.Message) (*Berry, error) {
 
   printable := util.QuotedPrintable([]byte(m.Header.Get("Subject")))
   subject, err := printable.Decode()
@@ -50,8 +53,10 @@ func NewBerry(m *mail.Message) (*Berry, error) {
       return false
     }
     
-    if token.Attr[0].Key == "class" && token.Attr[0].Val == "ennote" {
-      return true
+    for _, attr := range token.Attr {
+      if attr.Key == "class" && attr.Val == "ennote" {
+        return true
+      }
     }
 
     return false
@@ -66,15 +71,24 @@ func NewBerry(m *mail.Message) (*Berry, error) {
     return true
   })
 
-  return &Berry{ message : m, subject: subject, body: paragraphs, imgmap: imgmap }, nil
+  return &Berry{ Id: id, message : m, Subject: subject, Body: paragraphs, imgmap: imgmap }, nil
+}
+
+func NewBerryFromContent(id int64, subject string, content string, created time.Time) *Berry {
+  body := strings.Split(content, "\n")
+  return &Berry{ Id:id, Subject: subject, Body: body, Created: created }
 }
 
 func (b * Berry) GetSubject() string {
-  return b.subject
+  return b.Subject
 }
 
 func (b *Berry) GetBody() []string {
-  return b.body
+  return b.Body
+}
+
+func (b *Berry) ImgMap() map[string]image.Image {
+  return b.imgmap
 }
 
 func getParts(msg *mail.Message) ([]byte, map[string]image.Image, error) {
@@ -138,7 +152,7 @@ func getSrc(token *html.Token) string {
   return ""
 }
 
-func washUp(body []byte, startCond func(*html.Token) bool, paragraphCond func(*html.Token, int) bool)  []string {
+func washUp(body []byte, startCond func(*html.Token) bool, paragraphCond func(*html.Token, int) bool)  []string {  
   t := html.NewTokenizer(bytes.NewReader(body))
 
   effective := false

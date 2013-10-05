@@ -7,7 +7,10 @@ import (
 )
 
 type Config struct {
-  imap *imapConfig
+  ImapConfig *imapConfig
+  PostConfig *postConfig
+  DbConfig   *dbConfig
+  ServerConfig *serverConfig
 }
 
 func NewConfig(path string) *Config {
@@ -23,12 +26,13 @@ func NewConfig(path string) *Config {
     return nil
   }
 
-  imap := NewImapConfig(conf)
-  c := &Config{ imap: imap }
+  imap   := NewImapConfig(conf)
+  post   := NewPostConfig(conf)
+  db     := NewDbConfig(conf)
+  server := NewServerConfig(conf)
+
+  c := &Config{ ImapConfig: imap, PostConfig: post, DbConfig: db, ServerConfig: server }
   return c
 }
 
-func (c *Config) GetImapConfig() *imapConfig {
-  return c.imap
-}
 

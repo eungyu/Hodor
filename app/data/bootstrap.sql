@@ -1,0 +1,4 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE posts (id INTEGER PRIMARY KEY, title TEXT, content TEXT, created DATETIME, modified DATETIME);
+COMMIT;

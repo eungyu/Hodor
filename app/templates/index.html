@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+  <title>Lately.cc/eungyu</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link href="/eungyu/rss" type="application/atom+xml" rel="alternate" title="Eun-Gyu Kim">
+  <style>
+
+    body { 
+      font-family:'helvetica neue';
+      font-size:1.0em;
+    }
+
+    img {
+      width:100%;
+    }
+
+    .slate {
+      margin-left:auto;
+      margin-right:auto;
+      width:700px;
+    }
+
+    .slate h1 {
+      font-weight:200;
+      margin-bottom:1.2em;
+      margin-top:1.2em;
+      color:#259;
+    }
+
+    #rssicon {
+      background-image: url('/static/images/rss.png');
+      width:24px;
+      height:24px;
+    }
+  
+    @media all and (-webkit-device-pixel-ratio:2) {
+      #rssicon {
+        background-image: url('/static/images/rss@2x.png');
+        background-size: 100% 100%;
+      }
+    }
+
+    /* Smartphone */
+    @media only screen 
+    and (min-device-width : 320px)
+    and (max-device-width : 480px) {
+      .slate {
+        width:290px;
+      }
+      .slate h1 {
+        margin-top:10px;
+      }
+    }
+
+    /* iPad, etc */
+    @media only screen 
+    and (min-device-width : 768px) 
+    and (max-device-width : 1024px) {
+      .slate {
+        width:600px;
+      }
+      .slate h1 {
+        margin-top:30px;
+      }
+    }
+
+    .post {  
+      margin-bottom:3.0em;
+    }
+    .post h2 { 
+      font-weight:bold;
+      font-size:1.2em;
+    }
+    .post .writing {
+
+    }
+
+  </style>
+
+</head>
+<body>
+
+<div class="slate">
+
+<h1>lately.cc/eungyu</h1>
+
+{{range .}}
+<div class="post">
+  <h2>{{.Subject}}</h2>
+  <div class="writing">
+  {{range .Body}}
+    <p>{{.}}</p>
+  {{end}}
+  </div>
+</div>
+{{end}}
+
+
+<div style="padding-bottom:20px;">
+  <a href="/eungyu/rss"><div id="rssicon" style="float:right;"></div></a>
+  <div style="clear:both"></div>
+</div>
+
+ </div>
+</body>
+</html>
+
+

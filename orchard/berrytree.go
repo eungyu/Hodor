@@ -1,10 +1,11 @@
 package orchard
 
 import (
-  "time"
+  "log"
   "bytes"
   "net/mail"
   "errors"
+  "time"
   "hodor/config"
   "code.google.com/p/go-imap/go1/imap"
 )
@@ -15,7 +16,9 @@ type berryTree struct {
 }
 
 func NewBerryTree(config *config.Config) (*berryTree, error) {  
-  c, err := imap.DialTLS("imap.zoho.com",nil)
+  imapConfig := config.ImapConfig
+
+  c, err := imap.DialTLS(imapConfig.Server(),nil)
   if err != nil {
     return nil, err
   }
@@ -27,17 +30,15 @@ func NewBerryTree(config *config.Config) (*berryTree, error) {
     c.StartTLS(nil)
   }
 
-  imapConfig := config.GetImapConfig()
-
   // Authenticate
   if c.State() == imap.Login {
-    _, err := c.Login(imapConfig.GetUser(), imapConfig.GetPassword())
+    _, err := c.Login(imapConfig.User(), imapConfig.Pass())
     if err != nil {
       return nil, err
     }
   }
 
-  _, err = c.Select("INBOX", true)
+  _, err = c.Select("INBOX", false)
   if err != nil {
     return nil, err
   }
@@ -49,11 +50,29 @@ func NewBerryTree(config *config.Config) (*berryTree, error) {
   return b, nil
 }
 
+func (b *berryTree) ComeDown() {
+  b.client.Logout(1 * time.Second)
+}
+
+func (b *berryTree) Snap(config *config.Config, uid int64) error {
+  c := b.client
+
+  msgSeq, _ := imap.NewSeqSet("")
+  msgSeq.AddNum(uint32(uid))
+
+  _, err := c.Store(msgSeq, "+FLAGS", "(\\Seen)")
+  if err != nil {
+    log.Println(err)
+    return err
+  }
+
+  return nil
+}
+
 func (b *berryTree) Pick() (*Berry, error) {
 
   c := b.client
-  defer c.Logout(10 * time.Second)
-
+ 
   cmd, err := c.Send("SEARCH", "UNSEEN")
   if err != nil {
     return nil, err
@@ -82,9 +101,12 @@ func (b *berryTree) Pick() (*Berry, error) {
   }
 
   msgSeq, _ := imap.NewSeqSet("")
-  for _, uid := range messages {
-    msgSeq.AddNum(uid)
+  if len(messages) < 1 {
+    return nil, errors.New("No new messages")
   }
+
+  uid := messages[0]
+  msgSeq.AddNum(uid)
 
   if len(messages) > 0 {
     cmd, _ = c.Fetch(msgSeq, "RFC822")
@@ -93,7 +115,7 @@ func (b *berryTree) Pick() (*Berry, error) {
       for _, rsp := range cmd.Data {
         header := imap.AsBytes(rsp.MessageInfo().Attrs["RFC822"])
         if msg, _ := mail.ReadMessage(bytes.NewReader(header)); msg != nil {          
-          return NewBerry(msg)
+          return NewBerry(int64(uid), msg)
         }
       }
 
