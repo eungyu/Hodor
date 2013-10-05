@@ -2,118 +2,112 @@ package main
 
 import (
   "fmt"
-  "log"
-  "time"
-  "os"
-  "regexp"
-  "os/signal"
-  "syscall"
-  "database/sql"
-  "bytes"
+  "github.com/gorilla/mux"
+  _ "github.com/mattn/go-sqlite3"
+  "hodor/blog"
   "hodor/config"
   "hodor/orchard"
-  _ "github.com/mattn/go-sqlite3"
+  "log"
+  "net"
+  "net/http"
+  "os"
+  "os/signal"
+  "strconv"
+  "syscall"
+  "time"
 )
 
-func stroll(config *config.Config, berries chan *orchard.Berry) {
+const defaultConfigFile = "/etc/hodor/hodor.conf"
+
+func hodor(config *config.Config, pot *orchard.Pot) {
   for {
     tree, err := orchard.NewBerryTree(config)
-  
+
     if err != nil {
       log.Println("Couldn't instantiate berry tree")
     }
 
-    berry, err := tree.Pick()
-    if err != nil {
-      log.Println("Error while picking")
+    berry, _ := tree.Pick()
+
+    if berry == nil {
+      log.Println("No berries to pick")
+      tree.ComeDown()
+
+      time.Sleep(60 * time.Second)
+      continue
     }
-  
-    berries <- berry
-    time.Sleep(30 * time.Second)
+
+    pot.Put(berry)
+
+    tree.Snap(config, berry.Id)
+    tree.ComeDown()
+
+    time.Sleep(60 * time.Second)
   }
-}
-
-func nap(berries chan *orchard.Berry) {
-  db, err := sql.Open("sqlite3", "./Hodor.db")
-  if err != nil {
-    log.Fatal(err)
-  }
-  defer db.Close()
-
-  rows, err := db.Query("SELECT id FROM posts ORDER BY id DESC LIMIT 5")
-  if err != nil {
-    log.Fatal(err)
-  }
-  defer rows.Close()
-
-  for rows.Next() {
-    var id int
-    rows.Scan(&id)
-    fmt.Println(id)
-  }
-  rows.Close()
-
-  berry := <- berries
-
-  tx, err := db.Begin()
-  if err != nil {
-    log.Fatal(err)
-  }
-  stmt, err := tx.Prepare("INSERT INTO posts (subject, created) values(?, DATETIME('now'))")
-  if err != nil {
-    log.Fatal(err)
-  }
-
-  result, err := stmt.Exec(berry.GetSubject())
-  if err != nil {
-    log.Fatal(err)
-  }
-
-  lastid, err := result.LastInsertId()
-  if err != nil {
-    log.Fatal(err)
-  }
-
-  imgcount := 0
-  imgloc := "/Users/eungyu/Desktop/static/img/upload/%d-%d.jpg" 
-
-  var content bytes.Buffer
-
-  for _, paragraph := range berry.GetBody() {
-    isimg, _ := regexp.MatchString("^cid:[a-zA-Z0-9_]+\\.jpeg$", paragraph)
-    if isimg {
-      content.WriteString(fmt.Sprintf(imgloc, lastid, imgcount))
-    } else {
-      content.WriteString(paragraph)
-    }
-    content.WriteString("\n")
-  }
-
-  ustmt, err := tx.Prepare("UPDATE posts SET content = ? WHERE id = ?")
-  if err != nil {
-    log.Fatal(err)
-  }
-
-  ustmt.Exec(content.String(), lastid)
-
-  tx.Commit()
-
-  stmt.Close()
-  ustmt.Close()
-
 }
 
 func main() {
-  config := config.NewConfig("hodor.conf")
 
+  config := config.NewConfig(defaultConfigFile)
 
-  berries := make(chan *orchard.Berry)
-  go stroll(config, berries)
-  go nap(berries)
+  addr := fmt.Sprintf(":%d", config.ServerConfig.Port())
+  server := &http.Server{Addr: addr}
+  listener, err := net.Listen("tcp", addr)
+  if err != nil {
+    log.Fatal(err)
+  }
 
-  shutdown := make(chan os.Signal, 1)
-  signal.Notify(shutdown, syscall.SIGTERM)
+  // signal handler
+  go func() {
+    stop := make(chan os.Signal, 1)
+    signal.Notify(stop, syscall.SIGTERM)
+    <-stop
 
-  <-shutdown
+    log.Println("SIGTERM: Closing listener\n")
+    listener.Close()
+    return
+  }()
+
+  // Pot !
+  pot, err := orchard.NewPot(config)
+  if err != nil {
+    log.Panic("Failed to make pot")
+  }
+
+  // Set Hodor loose and hand him a pot
+  go hodor(config, pot)
+
+  // gorilla mux for routing
+  r := mux.NewRouter()
+
+  r.HandleFunc("/eungyu/rss", func(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "text/xml")
+    latest := pot.GetLatest()
+    rss := blog.NewRss(latest)
+    fmt.Fprintf(w, rss.Out())
+  })
+
+  r.HandleFunc("/eungyu/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+
+    id, err := strconv.Atoi(vars["id"])
+    if err != nil {
+      http.NotFound(w, r)
+      return
+    }
+
+    blog.Respond(config, w, pot.GetOne(id))
+  })
+
+  r.HandleFunc("/eungyu", func(w http.ResponseWriter, r *http.Request) {
+    blog.Respond(config, w, pot.GetLatest())
+  })
+
+  // delegate control to the gorilla mux
+  http.Handle("/", r)
+
+  // Run HTTP Server
+  server.Serve(listener)
+
   log.Println("Shutting down")
 }
