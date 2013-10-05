@@ -33,7 +33,7 @@ func hodor(config *config.Config, pot *orchard.Pot) {
       log.Println("No berries to pick")
       tree.ComeDown()
 
-      time.Sleep(60 * time.Second)
+      time.Sleep(60*time.Second)
       continue
     }
 
