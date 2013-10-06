@@ -115,6 +115,7 @@ func (b *berryTree) Pick() (*Berry, error) {
       for _, rsp := range cmd.Data {
         header := imap.AsBytes(rsp.MessageInfo().Attrs["RFC822"])
         if msg, _ := mail.ReadMessage(bytes.NewReader(header)); msg != nil {          
+          log.Println(msg.Header.Get("From"))
           return NewBerry(int64(uid), msg)
         }
       }

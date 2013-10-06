@@ -58,13 +58,6 @@ func NewPot(config *config.Config) (*Pot, error) {
   return pot, nil
 }
 
-func NewLatestPick(res chan []*Berry) Pick {
-  return Pick {
-    mode: LATEST,
-    num: numFrontPage,
-    res: res }  
-}
-
 func (p *Pot) Put(berry *Berry) {
   p.berries <- berry
 }
