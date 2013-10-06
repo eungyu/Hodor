@@ -24,6 +24,8 @@ import (
   "fmt"
 )
 
+const blockquote = ">"
+
 type Seed struct {
   id uint32
   subject string
@@ -72,6 +74,8 @@ func (s *Seed) Grow(lastid int64) (*Berry, error) {
   var content bytes.Buffer
 
   receipts := make(map[string]string)
+ 
+  inQuote := false
 
   // refactor this
   for _, paragraph := range s.Paragraphs() {
@@ -88,9 +92,28 @@ func (s *Seed) Grow(lastid int64) (*Berry, error) {
       receipts[paragraph] = imgname
       imgcount = imgcount + 1
     } else {
+      if len(paragraph) < 1 {
+        continue
+      }
+
+      if strings.HasPrefix(paragraph, blockquote) {
+        paragraph = strings.TrimFunc(paragraph[1:], unicode.IsSpace)
+        if !inQuote {
+          content.WriteString("<blockquote>")
+          inQuote = true
+        }
+      } else if inQuote {
+        content.WriteString("</blockquote>")
+        inQuote = false
+      }
       content.WriteString(enclose(paragraph))
     }
     content.WriteString("\n")
+  }
+
+  // find a cleaner way
+  if inQuote {
+    content.WriteString("</blockquote>")
   }
 
   for cid, img := range s.ImgMap() {
