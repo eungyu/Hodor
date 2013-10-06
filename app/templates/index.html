@@ -8,10 +8,16 @@
   <style>
 
     body { 
-      font-family:'helvetica neue';
-      font-size:1.0em;
+      font-family:'Apple SD Gothic Neo', 'helvetica neue';
+      font-size:0.95em;
+      font-weight: 300;
     }
 
+    blockquote {
+      border-left:2px solid #bbb;
+      margin-left:10px;
+      padding-left:13px;
+    }
     img {
       width:100%;
     }
@@ -70,7 +76,7 @@
       margin-bottom:3.0em;
     }
     .post h2 { 
-      font-weight:bold;
+      font-weight:400;
       font-size:1.2em;
     }
     .post .writing {
@@ -90,9 +96,7 @@
 <div class="post">
   <h2>{{.Subject}}</h2>
   <div class="writing">
-  {{range .Body}}
-    <p>{{.}}</p>
-  {{end}}
+  {{.Content}}
   </div>
 </div>
 {{end}}
