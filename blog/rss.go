@@ -48,12 +48,7 @@ type entryXml struct {
 func newEntry(berry *orchard.Berry) *entryXml {
   id := fmt.Sprintf("http://lately.cc/eungyu/%d", berry.Id)
 
-  content := ""
-  for _, paragraph := range berry.Body {
-    content = content + "<p>" + paragraph + "</p>"
-  }
-
-  s := &entrySummary{Content: content, Type: "html"}
+  s := &entrySummary{Content: berry.Content, Type: "html"}
   x := &entryXml{
     Title:  berry.Subject,
     Link: &linkXml{Href: id, Rel: "alternate"},

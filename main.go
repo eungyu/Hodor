@@ -27,19 +27,19 @@ func hodor(config *config.Config, pot *orchard.Pot) {
       log.Println("Couldn't instantiate berry tree")
     }
 
-    berry, _ := tree.Pick()
+    seed, _ := tree.Pick()
 
-    if berry == nil {
-      log.Println("No berries to pick")
+    if seed == nil {
+      log.Println("No seed to pick")
       tree.ComeDown()
 
       time.Sleep(60*time.Second)
       continue
     }
 
-    pot.Put(berry)
+    pot.Put(seed)
 
-    tree.Snap(config, berry.Id)
+    tree.Snap(config, seed.Id())
     tree.ComeDown()
 
     time.Sleep(60 * time.Second)

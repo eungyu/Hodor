@@ -1,16 +1,11 @@
 package orchard
 
 import (
-  "bufio"
-  "bytes"
   "database/sql"
   "fmt"
   _ "github.com/mattn/go-sqlite3"
   "hodor/config"
-  "image/jpeg"
   "log"
-  "os"
-  "regexp"
   "time"
 )
 
@@ -37,29 +32,29 @@ type Pick struct {
 
 type Pot struct {
   config *config.Config
-  berries chan *Berry
+  seeds chan *Seed
   pickch chan Pick
   shutdown chan bool
 }
 
 func NewPot(config *config.Config) (*Pot, error) {
-  berries := make(chan *Berry)
+  seeds := make(chan *Seed)
   pickch := make(chan Pick)
   shutdown := make(chan bool)
 
   pot := &Pot{
     config: config,
-    berries: berries,
+    seeds: seeds,
     pickch: pickch,
     shutdown: shutdown }
 
-  go potter(config, berries, pickch, shutdown)
+  go potter(config, seeds, pickch, shutdown)
 
   return pot, nil
 }
 
-func (p *Pot) Put(berry *Berry) {
-  p.berries <- berry
+func (p *Pot) Put(seed *Seed) {
+  p.seeds <- seed
 }
 
 func (p *Pot) GetOne(id int) []*Berry {
@@ -92,12 +87,11 @@ func (p *Pot) Shutdown() {
   p.shutdown <- true
 }
 
-func potter(config *config.Config, berries chan *Berry, pickch chan Pick, shutdown chan bool) {
-  mode := config.ServerConfig.Mode()
+func potter(config *config.Config, seeds chan *Seed, pickch chan Pick, shutdown chan bool) {
   basedir := config.ServerConfig.BaseDir()
   dbfile  := fmt.Sprintf("%s/%s", basedir, config.DbConfig.File())
-  postConfig := config.PostConfig
-
+  log.Println(dbfile)
+  
   cache := make(map[int64]*Berry)
 
   var recent []int64
@@ -105,7 +99,7 @@ func potter(config *config.Config, berries chan *Berry, pickch chan Pick, shutdo
 
   for {
     select {
-    case berry := <-berries:
+    case seed := <-seeds:
       db, err := sql.Open("sqlite3", dbfile)  
 
       tx, err := db.Begin()
@@ -117,7 +111,7 @@ func potter(config *config.Config, berries chan *Berry, pickch chan Pick, shutdo
         log.Fatal(err)
       }
 
-      result, err := stmt.Exec(berry.GetSubject())
+      result, err := stmt.Exec(seed.Subject())
       if err != nil {
         log.Fatal(err)
       }
@@ -127,44 +121,17 @@ func potter(config *config.Config, berries chan *Berry, pickch chan Pick, shutdo
         log.Fatal(err)
       }
 
-      imgcount := 0
-      imgformat := "%d-%d.jpg"
-
-      var content bytes.Buffer
-
-      receipts := make(map[string]string)
-
-      // refactor this
-      for _, paragraph := range berry.GetBody() {
-        isimg, _ := regexp.MatchString(imgRegEx, paragraph)
-        if isimg {
-          imgname := fmt.Sprintf(imgformat, lastid, imgcount)
-          
-          imgtagfmt := "<img src=\"http://lately.cc/eungyu%s/%s\">"
-          if mode == "dev" {
-            imgtagfmt = "<img src=\"%s/%s\">"
-          }
-
-          content.WriteString(fmt.Sprintf(imgtagfmt, postConfig.ImgUrl(), imgname))
-          receipts[paragraph] = imgname
-          imgcount = imgcount + 1
-        } else {
-          content.WriteString(paragraph)
-        }
-        content.WriteString("\n")
-      }
+      berry, err := seed.Grow(lastid)
 
       ustmt, err := tx.Prepare(updateQuery)
       if err != nil {
         log.Fatal(err)
       }
 
-      ustmt.Exec(content.String(), lastid)
+      ustmt.Exec(berry.Content, lastid)
+      cache[lastid] = berry
 
       tx.Commit()
-
-      log.Println("New Berry ", berry.GetSubject())
-      cache[lastid] = NewBerryFromContent(int64(lastid), berry.GetSubject(), content.String(), time.Now().UTC())
 
       if warmedup {
         newindex := make([]int64, 0, len(recent))
@@ -176,18 +143,6 @@ func potter(config *config.Config, berries chan *Berry, pickch chan Pick, shutdo
       }
 
       log.Println(recent)
-
-      for cid, img := range berry.ImgMap() {
-        name := fmt.Sprintf("%s%s/%s", basedir, postConfig.ImgUrl(), receipts[cid])
-
-        fo, _ := os.Create(name)
-        w := bufio.NewWriter(fo)
-
-        err = jpeg.Encode(w, img, nil)
-        if err != nil {
-          log.Fatal("Failed to write image")
-        }
-      }
 
       stmt.Close()
       ustmt.Close()
@@ -261,7 +216,7 @@ func potter(config *config.Config, berries chan *Berry, pickch chan Pick, shutdo
 
           rows.Scan(&id, &subject, &content, &created)
 
-          berry := NewBerryFromContent(id, subject, content, created)
+          berry, _ := NewBerry(id, subject, content, created)
           berries[i] = berry
           cache[id] = berry
 

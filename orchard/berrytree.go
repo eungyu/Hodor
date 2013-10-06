@@ -55,11 +55,11 @@ func (b *berryTree) ComeDown() {
   b.client.Logout(1 * time.Second)
 }
 
-func (b *berryTree) Snap(config *config.Config, uid int64) error {
+func (b *berryTree) Snap(config *config.Config, uid uint32) error {
   c := b.client
 
   msgSeq, _ := imap.NewSeqSet("")
-  msgSeq.AddNum(uint32(uid))
+  msgSeq.AddNum(uid)
 
   _, err := c.Store(msgSeq, "+FLAGS", "(\\Seen)")
   if err != nil {
@@ -70,7 +70,7 @@ func (b *berryTree) Snap(config *config.Config, uid int64) error {
   return nil
 }
 
-func (b *berryTree) Pick() (*Berry, error) {
+func (b *berryTree) Pick() (*Seed, error) {
 
   c := b.client
  
@@ -121,7 +121,7 @@ func (b *berryTree) Pick() (*Berry, error) {
             log.Println("Skipping dev entry")
             continue;
           }
-          return NewBerry(int64(uid), msg)
+          return ExtractSeedFromMail(uid, msg, b.config)
         }
       }
 
