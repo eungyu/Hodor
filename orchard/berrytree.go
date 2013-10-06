@@ -2,6 +2,7 @@ package orchard
 
 import (
   "log"
+  "strings"
   "bytes"
   "net/mail"
   "errors"
@@ -115,7 +116,11 @@ func (b *berryTree) Pick() (*Berry, error) {
       for _, rsp := range cmd.Data {
         header := imap.AsBytes(rsp.MessageInfo().Attrs["RFC822"])
         if msg, _ := mail.ReadMessage(bytes.NewReader(header)); msg != nil {          
-          log.Println(msg.Header.Get("From"))
+          recipient := msg.Header.Get("To")
+          if strings.Contains(recipient, "+dev") && !(b.config.ServerConfig.Mode() == "dev") {            
+            log.Println("Skipping dev entry")
+            continue;
+          }
           return NewBerry(int64(uid), msg)
         }
       }
