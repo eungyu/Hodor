@@ -119,6 +119,7 @@ func (s *Seed) Grow(lastid int64) (*Berry, error) {
   for cid, img := range s.ImgMap() {
     name := fmt.Sprintf("%s%s/%s", basedir, imgurl, receipts[cid])
     log.Println(name)
+    
     fo, _ := os.Create(name)
     w := bufio.NewWriter(fo)
 
