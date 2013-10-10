@@ -2,8 +2,6 @@ package orchard
 
 import (
   "time"
-  "bufio"
-  "os"
   "log"
   "net/mail"
   "hodor/util"
@@ -20,8 +18,6 @@ import (
   "image/jpeg"
   "encoding/base64"
   "hodor/config"
-  "regexp"
-  "fmt"
 )
 
 const blockquote = ">"
@@ -64,72 +60,8 @@ func enclose(paragraph string) string {
 
 // Grow processes Seed and produce a fully grown Berry
 func (s *Seed) Grow(lastid int64) (*Berry, error) {
-  mode := s.config.ServerConfig.Mode()  
-  imgurl := s.config.PostConfig.ImgUrl()
-  basedir := s.config.ServerConfig.BaseDir()
-
-  imgcount := 0
-  imgformat := "%d-%d.jpg"
-
-  var content bytes.Buffer
-
-  receipts := make(map[string]string)
- 
-  inQuote := false
-
-  // refactor this
-  for _, paragraph := range s.Paragraphs() {
-    isimg, _ := regexp.MatchString(imgRegEx, paragraph)
-    if isimg {
-      imgname := fmt.Sprintf(imgformat, lastid, imgcount)
-      
-      imgtagfmt := "<img src=\"http://lately.cc/eungyu%s/%s\">"
-      if mode == "dev" {
-        imgtagfmt = "<img src=\"%s/%s\">"
-      }
-
-      content.WriteString(enclose(fmt.Sprintf(imgtagfmt, imgurl, imgname)))
-      receipts[paragraph] = imgname
-      imgcount = imgcount + 1
-    } else {
-      if len(paragraph) < 1 {
-        continue
-      }
-
-      if strings.HasPrefix(paragraph, blockquote) {
-        paragraph = strings.TrimFunc(paragraph[1:], unicode.IsSpace)
-        if !inQuote {
-          content.WriteString("<blockquote>")
-          inQuote = true
-        }
-      } else if inQuote {
-        content.WriteString("</blockquote>")
-        inQuote = false
-      }
-      content.WriteString(enclose(paragraph))
-    }
-    content.WriteString("\n")
-  }
-
-  // find a cleaner way
-  if inQuote {
-    content.WriteString("</blockquote>")
-  }
-
-  for cid, img := range s.ImgMap() {
-    name := fmt.Sprintf("%s%s/%s", basedir, imgurl, receipts[cid])
-    log.Println(name)
-    
-    fo, _ := os.Create(name)
-    w := bufio.NewWriter(fo)
-
-    err := jpeg.Encode(w, img, nil)
-    if err != nil {
-      log.Fatal("Failed to write image")
-    }
-  }  
-
-  return NewBerry(lastid, s.subject, content.String(), time.Now().UTC() )
+  soil := NewSoil(lastid, s)
+  return NewBerry(lastid, s.subject, soil.Sprout(), time.Now().UTC() )
 }
 
 func ExtractSeedFromMail(id uint32, m *mail.Message, config *config.Config) (*Seed, error) {
