@@ -18,6 +18,7 @@ import (
 )
 
 const defaultConfigFile = "/etc/hodor/hodor.conf"
+const defaultCheckInterval = 60
 
 func hodor(config *config.Config, pot *orchard.Pot) {
   for {
@@ -25,6 +26,9 @@ func hodor(config *config.Config, pot *orchard.Pot) {
 
     if err != nil {
       log.Println("Couldn't instantiate berry tree")
+
+      time.Sleep(defaultCheckInterval * time.Second)
+      continue
     }
 
     seed, _ := tree.Pick()
@@ -33,7 +37,7 @@ func hodor(config *config.Config, pot *orchard.Pot) {
       log.Println("No seed to pick")
       tree.ComeDown()
 
-      time.Sleep(60*time.Second)
+      time.Sleep(defaultCheckInterval * time.Second)
       continue
     }
 
@@ -42,7 +46,7 @@ func hodor(config *config.Config, pot *orchard.Pot) {
     tree.Snap(config, seed.Id())
     tree.ComeDown()
 
-    time.Sleep(60 * time.Second)
+    time.Sleep(defaultCheckInterval * time.Second)
   }
 }
 

@@ -36,7 +36,7 @@ func NewSoil(id int64, seed *Seed) *Soil {
     if isimg {
       imgname := fmt.Sprintf(imgformat, id, imgcount)
       
-      imgtagfmt := "<img src=\"http://lately.cc/eungyu%s/%s\">"
+      imgtagfmt := "<img src=\"http://lately.cc%s/%s\">"
       if mode == "dev" {
         imgtagfmt = "<img src=\"%s/%s\">"
       }

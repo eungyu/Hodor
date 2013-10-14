@@ -2,7 +2,6 @@ package main
 
 import (
   "log"
-  "unicode"
   "strings"
   "io/ioutil"
   "bytes"
@@ -11,7 +10,7 @@ import (
 )
 
 func main() {
-  rawbody, err := ioutil.ReadFile("test/mail-05.txt")
+  rawbody, err := ioutil.ReadFile("mail-06.txt")
   if err != nil {
     log.Println("Failed to open file")
   }
@@ -41,6 +40,13 @@ func main() {
       return false
     }
     return true
+  },
+  func(token *html.Token) bool {
+    if token.DataAtom == atom.A {
+      return true
+    }
+
+    return false
   })
 
   log.Println(paragraphs)
@@ -60,7 +66,7 @@ func getSrc(token *html.Token) string {
   return ""
 }
 
-func washUp(body []byte, startCond func(*html.Token) bool, paragraphCond func(*html.Token, int) bool)  []string {  
+func washUp(body []byte, startCond func(*html.Token) bool, paragraphCond func(*html.Token, int) bool, allowed func(*html.Token) bool)  []string {  
   t := html.NewTokenizer(bytes.NewReader(body))
 
   effective := false
@@ -103,12 +109,20 @@ func washUp(body []byte, startCond func(*html.Token) bool, paragraphCond func(*h
         }
       }
 
+      if allowed(&token) {
+        buf.WriteString(token.String())
+      }
+
     case html.EndTagToken:
       if paragraphCond(&token, taglevel) {
         if buf.Len() > 0 {
           paragraphs = append(paragraphs, buf.String())
           buf.Reset()
         }
+      }
+
+      if allowed(&token) {
+        buf.WriteString(token.String())
       }
 
       if taglevel == 0 {
@@ -118,13 +132,12 @@ func washUp(body []byte, startCond func(*html.Token) bool, paragraphCond func(*h
       taglevel = taglevel - 1
 
     case html.TextToken:
-      content := strings.TrimFunc(token.Data, unicode.IsSpace)
-      if len(content) > 0 {
-        if buf.Len() > 0 {
-          buf.WriteString(" ")
-        }
-        buf.WriteString(content)
+      log.Println(token.Data)
+      content := token.Data
+      if len(strings.TrimSpace(content)) < 1 {
+        continue
       }
+      buf.WriteString(strings.Trim(content, "\n"))
     }
   }
 
